@@ -1,0 +1,125 @@
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFE066 0%, #FFA500 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  background: #000;
+  color: #FFE066;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-header h1 {
+  font-size: 1.5rem;
+}
+
+.logout-btn {
+  background: #FFE066;
+  color: #000;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.welcome-section {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  text-align: center;
+  color: #333;
+}
+
+.welcome-section h2 {
+  font-size: 2rem;
+  color: #FFE066;
+}
+
+.welcome-section p {
+  color: #e74c3c;
+  font-size: 0.9rem;
+}
+
+.customers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+  flex: 1;
+}
+
+.customer-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.customer-card:hover {
+  transform: translateY(-5px);
+}
+
+.avatar {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  background: #FFE066;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.5rem;
+}
+
+.customer-card h3 {
+  color: #e74c3c;
+  margin-bottom: 0.5rem;
+}
+
+.customer-card p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.status.in\ service {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.not\ acquiring {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.dashboard-footer {
+  background: #000;
+  color: #FFE066;
+  text-align: center;
+  padding: 1rem;
+  margin-top: auto;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  margin: 1rem;
+  border-radius: 5px;
+}

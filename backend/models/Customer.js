@@ -4,13 +4,12 @@ const customerSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Please provide a customer name'],
+      required: [true, 'Please provide customer name'],
       trim: true,
     },
     email: {
       type: String,
       required: [true, 'Please provide an email'],
-      unique: true,
       lowercase: true,
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
@@ -21,10 +20,8 @@ const customerSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please provide a phone number'],
     },
-    status: {
+    address: {
       type: String,
-      enum: ['In Service', 'Not Acquiring'],
-      default: 'In Service',
     },
   },
   { timestamps: true }

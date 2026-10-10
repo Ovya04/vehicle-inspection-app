@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Inspection.css';
 
 const Inspection = () => {
   const { vehicleId } = useParams();
+  const { logout } = useAuth();
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [uploadedImages, setUploadedImages] = useState([]);
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     tires: {
       leftFront: '',
@@ -20,7 +20,6 @@ const Inspection = () => {
     },
     battery: {
       make: '',
-      replacementDate: '',
       voltage: '',
       waterLevel: '',
       damage: '',
@@ -31,26 +30,17 @@ const Inspection = () => {
       dent: '',
       damage: '',
       damageNotes: '',
-      suspensionOilLeak: '',
-      images: [],
     },
     brakes: {
       fluidLevel: '',
       frontCondition: '',
       rearCondition: '',
-      emergencyBrakeCondition: '',
-      overallSummary: '',
     },
     engine: {
-      rust: false,
-      dent: false,
-      damage: false,
       oilCondition: '',
       oilColour: '',
-      brakeFluidCondition: '',
-      brakeFluidColour: '',
-      oilLeak: false,
     },
+    status: 'Pending',
   });
 
   useEffect(() => {
@@ -59,382 +49,227 @@ const Inspection = () => {
 
   const fetchInspection = async () => {
     try {
-      setLoading(true);
+      const token = localStorage.getItem('token');
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/inspections/vehicle/${vehicleId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      if (response.data.inspection) {
-        setFormData(response.data.inspection);
+      if (response.data) {
+        setFormData(response.data);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch inspection');
+      // If inspection doesn't exist, that's okay - we'll create a new one
+      console.log('No existing inspection');
+    }
+  };
+
+  const handleChange = (section, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/inspections/vehicle/${vehicleId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setSuccess('Inspection saved successfully!');
+      setTimeout(() => navigate(-1), 2000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to save inspection');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const [section, field] = name.split('.');
-
-    if (section) {
-      setFormData((prev) => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: type === 'checkbox' ? checked : value,
-        },
-      }));
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImages((prev) => [...prev, reader.result]);
-        setFormData((prev) => ({
-          ...prev,
-          exterior: {
-            ...prev.exterior,
-            images: [...prev.exterior.images, reader.result],
-          },
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/inspections/vehicle/${vehicleId}`,
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert('Inspection submitted successfully!');
-      navigate('/inspector-dashboard');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit inspection');
-    }
-  };
-
-  if (loading) return <div>Loading inspection form...</div>;
 
   return (
-    <div className="inspection-container">
-      <header className="inspection-header">
-        <h1>Vehicle Inspection</h1>
-      </header>
+    <div className="dashboard">
+      <div className="dashboard-header">
+        <div>
+          <button onClick={() => navigate(-1)} className="back-btn">
+            ← Back
+          </button>
+          <h1>Vehicle Inspection Form</h1>
+        </div>
+        <button onClick={handleLogout} className="logout-btn">
+          Logout
+        </button>
+      </div>
 
       {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
 
-      <form onSubmit={handleSubmit} className="inspection-form">
+      <form onSubmit={handleSubmit} className="form-container">
         {/* Tires Section */}
-        <section className="inspection-section">
-          <h2 className="section-title">Tires</h2>
+        <h2>Tires</h2>
+        <div className="form-row">
           <div className="form-group">
-            <label>Left Front:</label>
+            <label>Left Front</label>
             <input
               type="text"
-              name="tires.leftFront"
               value={formData.tires.leftFront}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('tires', 'leftFront', e.target.value)}
               placeholder="Condition"
             />
           </div>
           <div className="form-group">
-            <label>Right Front:</label>
+            <label>Right Front</label>
             <input
               type="text"
-              name="tires.rightFront"
               value={formData.tires.rightFront}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('tires', 'rightFront', e.target.value)}
               placeholder="Condition"
             />
           </div>
           <div className="form-group">
-            <label>Left Rear:</label>
+            <label>Left Rear</label>
             <input
               type="text"
-              name="tires.leftRear"
               value={formData.tires.leftRear}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('tires', 'leftRear', e.target.value)}
               placeholder="Condition"
             />
           </div>
           <div className="form-group">
-            <label>Right Rear:</label>
+            <label>Right Rear</label>
             <input
               type="text"
-              name="tires.rightRear"
               value={formData.tires.rightRear}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('tires', 'rightRear', e.target.value)}
               placeholder="Condition"
             />
           </div>
-        </section>
+        </div>
 
         {/* Battery Section */}
-        <section className="inspection-section">
-          <h2 className="section-title">Battery</h2>
+        <h2>Battery</h2>
+        <div className="form-row">
           <div className="form-group">
-            <label>Make:</label>
+            <label>Make</label>
             <input
               type="text"
-              name="battery.make"
               value={formData.battery.make}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('battery', 'make', e.target.value)}
+              placeholder="Battery make"
             />
           </div>
           <div className="form-group">
-            <label>Replacement Date:</label>
-            <input
-              type="date"
-              name="battery.replacementDate"
-              value={formData.battery.replacementDate}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Voltage:</label>
+            <label>Voltage</label>
             <input
               type="text"
-              name="battery.voltage"
               value={formData.battery.voltage}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('battery', 'voltage', e.target.value)}
+              placeholder="Voltage"
             />
           </div>
           <div className="form-group">
-            <label>Water Level:</label>
+            <label>Water Level</label>
             <input
               type="text"
-              name="battery.waterLevel"
               value={formData.battery.waterLevel}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('battery', 'waterLevel', e.target.value)}
+              placeholder="Water level"
             />
           </div>
-          <div className="form-group">
-            <label>Damage:</label>
-            <input
-              type="text"
-              name="battery.damage"
-              value={formData.battery.damage}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Leak:</label>
-            <input
-              type="text"
-              name="battery.leak"
-              value={formData.battery.leak}
-              onChange={handleInputChange}
-            />
-          </div>
-        </section>
-
-        {/* Exterior Section */}
-        <section className="inspection-section">
-          <h2 className="section-title">Exterior</h2>
-          <div className="form-group">
-            <label>Rust:</label>
-            <input
-              type="text"
-              name="exterior.rust"
-              value={formData.exterior.rust}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Dent:</label>
-            <input
-              type="text"
-              name="exterior.dent"
-              value={formData.exterior.dent}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Damage:</label>
-            <input
-              type="text"
-              name="exterior.damage"
-              value={formData.exterior.damage}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Damage Notes:</label>
-            <textarea
-              name="exterior.damageNotes"
-              value={formData.exterior.damageNotes}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Suspension Oil Leak:</label>
-            <input
-              type="text"
-              name="exterior.suspensionOilLeak"
-              value={formData.exterior.suspensionOilLeak}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Upload Images:</label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImageUpload}
-            />
-            <div className="image-preview">
-              {uploadedImages.map((img, idx) => (
-                <img key={idx} src={img} alt={`preview-${idx}`} />
-              ))}
-            </div>
-          </div>
-        </section>
+        </div>
 
         {/* Brakes Section */}
-        <section className="inspection-section">
-          <h2 className="section-title">Brakes</h2>
+        <h2>Brakes</h2>
+        <div className="form-row">
           <div className="form-group">
-            <label>Fluid Level:</label>
+            <label>Fluid Level</label>
             <input
               type="text"
-              name="brakes.fluidLevel"
               value={formData.brakes.fluidLevel}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('brakes', 'fluidLevel', e.target.value)}
+              placeholder="Fluid level"
             />
           </div>
           <div className="form-group">
-            <label>Front Condition:</label>
+            <label>Front Condition</label>
             <input
               type="text"
-              name="brakes.frontCondition"
               value={formData.brakes.frontCondition}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('brakes', 'frontCondition', e.target.value)}
+              placeholder="Condition"
             />
           </div>
           <div className="form-group">
-            <label>Rear Condition:</label>
+            <label>Rear Condition</label>
             <input
               type="text"
-              name="brakes.rearCondition"
               value={formData.brakes.rearCondition}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('brakes', 'rearCondition', e.target.value)}
+              placeholder="Condition"
             />
           </div>
-          <div className="form-group">
-            <label>Emergency Brake Condition:</label>
-            <input
-              type="text"
-              name="brakes.emergencyBrakeCondition"
-              value={formData.brakes.emergencyBrakeCondition}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Overall Summary:</label>
-            <textarea
-              name="brakes.overallSummary"
-              value={formData.brakes.overallSummary}
-              onChange={handleInputChange}
-            />
-          </div>
-        </section>
+        </div>
 
         {/* Engine Section */}
-        <section className="inspection-section">
-          <h2 className="section-title">Engine</h2>
-          <div className="form-group checkbox">
-            <label>
-              <input
-                type="checkbox"
-                name="engine.rust"
-                checked={formData.engine.rust}
-                onChange={handleInputChange}
-              />
-              Rust
-            </label>
-          </div>
-          <div className="form-group checkbox">
-            <label>
-              <input
-                type="checkbox"
-                name="engine.dent"
-                checked={formData.engine.dent}
-                onChange={handleInputChange}
-              />
-              Dent
-            </label>
-          </div>
-          <div className="form-group checkbox">
-            <label>
-              <input
-                type="checkbox"
-                name="engine.damage"
-                checked={formData.engine.damage}
-                onChange={handleInputChange}
-              />
-              Damage
-            </label>
-          </div>
+        <h2>Engine</h2>
+        <div className="form-row">
           <div className="form-group">
-            <label>Oil Condition:</label>
+            <label>Oil Condition</label>
             <input
               type="text"
-              name="engine.oilCondition"
               value={formData.engine.oilCondition}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('engine', 'oilCondition', e.target.value)}
+              placeholder="Oil condition"
             />
           </div>
           <div className="form-group">
-            <label>Oil Colour:</label>
+            <label>Oil Colour</label>
             <input
               type="text"
-              name="engine.oilColour"
               value={formData.engine.oilColour}
-              onChange={handleInputChange}
+              onChange={(e) => handleChange('engine', 'oilColour', e.target.value)}
+              placeholder="Oil colour"
             />
           </div>
-          <div className="form-group">
-            <label>Brake Fluid Condition:</label>
-            <input
-              type="text"
-              name="engine.brakeFluidCondition"
-              value={formData.engine.brakeFluidCondition}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Brake Fluid Colour:</label>
-            <input
-              type="text"
-              name="engine.brakeFluidColour"
-              value={formData.engine.brakeFluidColour}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group checkbox">
-            <label>
-              <input
-                type="checkbox"
-                name="engine.oilLeak"
-                checked={formData.engine.oilLeak}
-                onChange={handleInputChange}
-              />
-              Oil Leak
-            </label>
-          </div>
-        </section>
+        </div>
 
-        <button type="submit" className="submit-btn">Submit Inspection</button>
+        {/* Status */}
+        <div className="form-group">
+          <label>Status</label>
+          <select
+            value={formData.status}
+            onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+          >
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+
+        <button type="submit" disabled={loading} className="btn-submit">
+          {loading ? 'Saving...' : 'Save Inspection'}
+        </button>
       </form>
     </div>
   );

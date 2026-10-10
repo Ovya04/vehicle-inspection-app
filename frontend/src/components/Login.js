@@ -1,24 +1,26 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Login.css';
 
 const Login = () => {
-  const [isRegister, setIsRegister] = useState(false);
-  const [formData, setFormData] = useState({ 
-    name: '',
-    email: '', 
-    password: '' 
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
   });
-  const [error, setError] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const [error, setError] = useState('');
 
-  const handleChange = (e) => {
+  const navigate = useNavigate();
+  const { login, register } = useAuth();
+
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -28,27 +30,19 @@ const Login = () => {
 
     try {
       if (isRegister) {
-        // Register
-        const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/auth/register`,
-          formData
-        );
-        setError('');
-        alert('Registration successful! Now login with your credentials.');
-        setIsRegister(false);
-        setFormData({ name: '', email: '', password: '' });
+        const name = document.getElementById('name')?.value;
+        if (!name) {
+          setError('Name is required');
+          setLoading(false);
+          return;
+        }
+        await register(name, formData.email, formData.password);
       } else {
-        // Login
-        const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/auth/login`,
-          { email: formData.email, password: formData.password }
-        );
-
-        login(response.data.inspector, response.data.token);
-        navigate('/inspector-dashboard');
+        await login(formData.email, formData.password);
       }
+      navigate('/inspector-dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || (isRegister ? 'Registration failed' : 'Login failed'));
+      setError(err.response?.data?.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -57,69 +51,63 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>CAT INSPECT</h1>
-        <h2>{isRegister ? 'Inspector Registration' : 'Inspector Login'}</h2>
+        <h1>{isRegister ? 'Register' : 'Login'}</h1>
         {error && <div className="error-message">{error}</div>}
+
         <form onSubmit={handleSubmit}>
           {isRegister && (
+            <div className="form-group">
+              <label htmlFor="name">Name</label>
+              <input
+                id="name"
+                type="text"
+                placeholder="Full Name"
+                required
+              />
+            </div>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
             <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              value={formData.name}
-              onChange={handleChange}
+              id="email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Email"
               required
             />
-          )}
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          <button type="submit" disabled={loading}>
-            {loading ? (isRegister ? 'Registering...' : 'Logging in...') : (isRegister ? 'Register' : 'Login')}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Password (min 6 characters)"
+              required
+            />
+          </div>
+
+          <button type="submit" disabled={loading} className="submit-btn">
+            {loading ? 'Loading...' : isRegister ? 'Register' : 'Login'}
           </button>
         </form>
-        <div className="toggle-link">
-          {isRegister ? (
-            <>
-              Already have an account? <button 
-                type="button" 
-                onClick={() => {
-                  setIsRegister(false);
-                  setFormData({ name: '', email: '', password: '' });
-                  setError('');
-                }}
-              >
-                Login
-              </button>
-            </>
-          ) : (
-            <>
-              Don't have an account? <button 
-                type="button" 
-                onClick={() => {
-                  setIsRegister(true);
-                  setFormData({ name: '', email: '', password: '' });
-                  setError('');
-                }}
-              >
-                Register
-              </button>
-            </>
-          )}
-        </div>
+
+        <p className="toggle-auth">
+          {isRegister ? 'Already have an account? ' : "Don't have an account? "}
+          <button
+            type="button"
+            onClick={() => setIsRegister(!isRegister)}
+            className="link-button"
+          >
+            {isRegister ? 'Login' : 'Register'}
+          </button>
+        </p>
       </div>
     </div>
   );

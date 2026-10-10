@@ -1,62 +1,49 @@
 const Vehicle = require('../models/Vehicle');
-const Customer = require('../models/Customer');
 
-// Get all vehicles
-exports.getAllVehicles = async (req, res) => {
+exports.getAllVehicles = async (req, res, next) => {
   try {
-    const vehicles = await Vehicle.find().populate('customerId');
+    const vehicles = await Vehicle.find()
+      .populate('customerId')
+      .sort({ createdAt: -1 });
+
     res.status(200).json({
       count: vehicles.length,
       vehicles,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// Get vehicles by customer ID
-exports.getVehiclesByCustomer = async (req, res) => {
+exports.getVehiclesByCustomer = async (req, res, next) => {
   try {
     const { customerId } = req.params;
 
-    // Validate customer exists
-    const customer = await Customer.findById(customerId);
-    if (!customer) {
-      return res.status(404).json({ message: 'Customer not found' });
-    }
+    const vehicles = await Vehicle.find({ customerId })
+      .populate('customerId')
+      .sort({ createdAt: -1 });
 
-    const vehicles = await Vehicle.find({ customerId });
     res.status(200).json({
       count: vehicles.length,
       vehicles,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// Create a new vehicle
-exports.createVehicle = async (req, res) => {
+exports.createVehicle = async (req, res, next) => {
   try {
-    const { customerId, vehicleName, vehicleType, imageUrl } = req.body;
+    const { customerId, make, model, year, vin, color, mileage } = req.body;
 
-    // Validate input
-    if (!customerId || !vehicleName) {
-      return res.status(400).json({ message: 'Please provide customerId and vehicleName' });
-    }
-
-    // Validate customer exists
-    const customer = await Customer.findById(customerId);
-    if (!customer) {
-      return res.status(404).json({ message: 'Customer not found' });
-    }
-
-    // Create vehicle
     const vehicle = await Vehicle.create({
       customerId,
-      vehicleName,
-      vehicleType,
-      imageUrl,
+      make,
+      model,
+      year,
+      vin,
+      color,
+      mileage,
     });
 
     res.status(201).json({
@@ -64,6 +51,47 @@ exports.createVehicle = async (req, res) => {
       vehicle,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
+  }
+};
+
+exports.updateVehicle = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const vehicle = await Vehicle.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('customerId');
+
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    res.status(200).json({
+      message: 'Vehicle updated successfully',
+      vehicle,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteVehicle = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const vehicle = await Vehicle.findByIdAndDelete(id);
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    res.status(200).json({
+      message: 'Vehicle deleted successfully',
+    });
+  } catch (error) {
+    next(error);
   }
 };

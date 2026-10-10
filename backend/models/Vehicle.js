@@ -5,20 +5,34 @@ const vehicleSchema = new mongoose.Schema(
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Customer',
-      required: [true, 'Please provide a customer ID'],
+      required: [true, 'Please provide customer ID'],
     },
-    vehicleName: {
+    make: {
       type: String,
-      required: [true, 'Please provide a vehicle name'],
+      required: [true, 'Please provide vehicle make'],
       trim: true,
     },
-    vehicleType: {
+    model: {
       type: String,
-      default: 'Truck',
+      required: [true, 'Please provide vehicle model'],
+      trim: true,
     },
-    imageUrl: {
+    year: {
+      type: Number,
+      required: [true, 'Please provide vehicle year'],
+    },
+    vin: {
       type: String,
-      default: null,
+      required: [true, 'Please provide VIN'],
+      unique: true,
+      trim: true,
+    },
+    color: {
+      type: String,
+    },
+    mileage: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

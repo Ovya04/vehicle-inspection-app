@@ -1,0 +1,134 @@
+.login-selection-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  padding: 20px;
+}
+
+.login-selection-card {
+  background: white;
+  padding: 50px;
+  border-radius: 15px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 3px solid black;
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+}
+
+.login-selection-card h1 {
+  color: black;
+  margin-bottom: 10px;
+  font-size: 32px;
+}
+
+.login-selection-card > p {
+  color: black;
+  margin-bottom: 40px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.role-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.role-btn {
+  padding: 30px 20px;
+  border: 3px solid black;
+  border-radius: 10px;
+  background: #FFD700;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.role-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: #FFA500;
+}
+
+.inspector-btn {
+  background: #FFD700;
+}
+
+.inspector-btn:hover {
+  background: #FFA500;
+}
+
+.customer-btn {
+  background: #FFD700;
+}
+
+.customer-btn:hover {
+  background: #FFA500;
+}
+
+.admin-btn {
+  background: #FFD700;
+}
+
+.admin-btn:hover {
+  background: #FFA500;
+}
+
+.role-btn h2 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  color: black;
+}
+
+.role-btn p {
+  margin: 0;
+  color: black;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.registration-section {
+  border-top: 3px solid black;
+  padding-top: 30px;
+}
+
+.registration-section p {
+  color: black;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.register-link {
+  padding: 10px 30px;
+  background: black;
+  color: #FFD700;
+  border: 2px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+  font-size: 16px;
+}
+
+.register-link:hover {
+  background: #333;
+}
+
+@media (max-width: 600px) {
+  .login-selection-card {
+    padding: 30px 20px;
+  }
+
+  .login-selection-card h1 {
+    font-size: 24px;
+  }
+
+  .role-buttons {
+    grid-template-columns: 1fr;
+  }
+}

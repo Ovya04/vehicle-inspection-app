@@ -24,11 +24,22 @@ const inspectorSchema = new mongoose.Schema(
       minlength: 6,
       select: false,
     },
+    phone: String,
+    licenseNumber: String,
+    specialization: String,
+    status: {
+      type: String,
+      enum: ['active', 'inactive'],
+      default: 'active',
+    },
+    role: {
+      type: String,
+      default: 'inspector',
+    },
   },
   { timestamps: true }
 );
 
-// Hash password before saving
 inspectorSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   
@@ -41,7 +52,6 @@ inspectorSchema.pre('save', async function (next) {
   }
 });
 
-// Method to compare passwords
 inspectorSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

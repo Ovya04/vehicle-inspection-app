@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
 
 const InspectorDashboard = () => {
+  const { user, logout } = useAuth();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { token, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCustomers();
@@ -17,55 +18,81 @@ const InspectorDashboard = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/customers`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      setCustomers(response.data.customers);
+      setCustomers(response.data.customers || []);
+      setError('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch customers');
+      setError(err.response?.data?.message || 'Failed to load customers');
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1>CAT INSPECT</h1>
-        <button onClick={logout} className="logout-btn">Logout</button>
-      </header>
+  const handleCustomerClick = (customerId) => {
+    navigate(`/vehicles/${customerId}`);
+  };
 
-      <div className="welcome-section">
-        <h2>Welcome Inspector!</h2>
-        <p>Vehicle management made easy</p>
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  if (loading) {
+    return <div className="loading">Loading customers...</div>;
+  }
+
+  return (
+    <div className="dashboard">
+      <div className="dashboard-header">
+        <div>
+          <h1>Welcome, {user?.name || 'Inspector'}!</h1>
+          <p>Vehicle management made easy</p>
+        </div>
+        <button onClick={handleLogout} className="logout-btn">
+          Logout
+        </button>
       </div>
 
       {error && <div className="error-message">{error}</div>}
 
-      {loading ? (
-        <div>Loading customers...</div>
+      <h2>Customers</h2>
+      
+      {customers.length === 0 ? (
+        <p>No customers found</p>
       ) : (
         <div className="customers-grid">
           {customers.map((customer) => (
-            <Link to={`/vehicles/${customer._id}`} key={customer._id}>
-              <div className="customer-card">
-                <div className="avatar">👤</div>
-                <h3>{customer.name}</h3>
-                <p>Email: {customer.email}</p>
-                <p>Phone: {customer.phone}</p>
-                <p className={`status ${customer.status.toLowerCase()}`}>
-                  {customer.status}
+            <div
+              key={customer._id}
+              className="customer-card"
+              onClick={() => handleCustomerClick(customer._id)}
+            >
+              <h3>{customer.name}</h3>
+              <p>
+                <strong>Email:</strong> {customer.email}
+              </p>
+              <p>
+                <strong>Phone:</strong> {customer.phone}
+              </p>
+              {customer.address && (
+                <p>
+                  <strong>Address:</strong> {customer.address}
                 </p>
-              </div>
-            </Link>
+              )}
+              <button className="btn">View Vehicles</button>
+            </div>
           ))}
         </div>
       )}
-
-      <footer className="dashboard-footer">
-        <p>© 2024 Vehicle Inspection System. All rights reserved.</p>
-      </footer>
     </div>
   );
 };

@@ -1,55 +1,89 @@
 const Customer = require('../models/Customer');
 
-// Get all customers
-exports.getAllCustomers = async (req, res) => {
+exports.getAllCustomers = async (req, res, next) => {
   try {
-    const customers = await Customer.find();
+    const customers = await Customer.find().sort({ createdAt: -1 });
     res.status(200).json({
       count: customers.length,
       customers,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// Create a new customer
-exports.createCustomer = async (req, res) => {
+exports.getCustomerById = async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
+    const { id } = req.params;
 
-    // Validate input
-    if (!name || !email || !phone) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
+    const customer = await Customer.findById(id);
+    if (!customer) {
+      return res.status(404).json({ message: 'Customer not found' });
     }
 
-    // Check if customer already exists
-    const existingCustomer = await Customer.findOne({ email });
-    if (existingCustomer) {
-      return res.status(400).json({ message: 'Email already exists' });
-    }
+    res.status(200).json(customer);
+  } catch (error) {
+    next(error);
+  }
+};
 
-    // Create customer
-    const customer = await Customer.create({ name, email, phone });
+exports.createCustomer = async (req, res, next) => {
+  try {
+    const { name, email, phone, address } = req.body;
+
+    const customer = await Customer.create({
+      name,
+      email,
+      phone,
+      address,
+    });
 
     res.status(201).json({
       message: 'Customer created successfully',
       customer,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// Get customer by ID
-exports.getCustomerById = async (req, res) => {
+exports.updateCustomer = async (req, res, next) => {
   try {
-    const customer = await Customer.findById(req.params.id);
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const customer = await Customer.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
     if (!customer) {
       return res.status(404).json({ message: 'Customer not found' });
     }
-    res.status(200).json(customer);
+
+    res.status(200).json({
+      message: 'Customer updated successfully',
+      customer,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
+  }
+};
+
+exports.deleteCustomer = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const customer = await Customer.findByIdAndDelete(id);
+    if (!customer) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+
+    res.status(200).json({
+      message: 'Customer deleted successfully',
+    });
+  } catch (error) {
+    next(error);
   }
 };

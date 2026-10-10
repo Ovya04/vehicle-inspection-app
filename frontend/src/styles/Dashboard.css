@@ -1,125 +1,179 @@
-.dashboard-container {
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
   min-height: 100vh;
-  background: linear-gradient(135deg, #FFE066 0%, #FFA500 100%);
-  display: flex;
-  flex-direction: column;
 }
 
 .dashboard-header {
-  background: #000;
-  color: #FFE066;
-  padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 3px solid black;
 }
 
 .dashboard-header h1 {
-  font-size: 1.5rem;
+  color: black;
+  margin: 0;
+  font-weight: bold;
+}
+
+.dashboard-header p {
+  color: black;
+  margin: 5px 0 0 0;
+  font-weight: bold;
 }
 
 .logout-btn {
-  background: #FFE066;
-  color: #000;
-  border: none;
-  padding: 0.5rem 1rem;
+  padding: 10px 20px;
+  background: black;
+  color: #FFD700;
+  border: 2px solid black;
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
+  transition: background 0.3s;
 }
 
-.welcome-section {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
-  text-align: center;
-  color: #333;
+.logout-btn:hover {
+  background: #333;
 }
 
-.welcome-section h2 {
-  font-size: 2rem;
-  color: #FFE066;
-}
-
-.welcome-section p {
-  color: #e74c3c;
-  font-size: 0.9rem;
-}
-
-.customers-grid {
+.customers-grid,
+.vehicles-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  padding: 2rem;
-  flex: 1;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
-.customer-card {
+.customer-card,
+.vehicle-card {
   background: white;
+  padding: 20px;
   border-radius: 10px;
-  padding: 1.5rem;
-  text-align: center;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 3px solid black;
 }
 
-.customer-card:hover {
+.customer-card:hover,
+.vehicle-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  background: #FFD700;
 }
 
-.avatar {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-  background: #FFE066;
-  border-radius: 50%;
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 0.5rem;
-}
-
-.customer-card h3 {
-  color: #e74c3c;
-  margin-bottom: 0.5rem;
-}
-
-.customer-card p {
-  color: #666;
-  font-size: 0.9rem;
-  margin: 0.25rem 0;
-}
-
-.status {
-  padding: 0.25rem 0.5rem;
-  border-radius: 5px;
+.customer-card h3,
+.vehicle-card h3 {
+  color: black;
+  margin: 0 0 15px 0;
   font-weight: bold;
-  margin-top: 0.5rem;
 }
 
-.status.in\ service {
-  background: #d4edda;
-  color: #155724;
+.customer-card p,
+.vehicle-card p {
+  color: black;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
-.status.not\ acquiring {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.dashboard-footer {
-  background: #000;
-  color: #FFE066;
-  text-align: center;
-  padding: 1rem;
-  margin-top: auto;
+.customer-card .btn,
+.vehicle-card .btn {
+  width: 100%;
+  margin-top: 10px;
 }
 
 .error-message {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 1rem;
-  margin: 1rem;
+  background: #FFB6C1;
+  color: black;
+  padding: 15px;
   border-radius: 5px;
+  margin-bottom: 20px;
+  border: 2px solid black;
+  font-weight: bold;
+}
+
+.success-message {
+  background: #90EE90;
+  color: black;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  border: 2px solid black;
+  font-weight: bold;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: black;
+  font-weight: bold;
+}
+
+.btn {
+  padding: 10px 20px;
+  background: black;
+  color: #FFD700;
+  border: 2px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn:hover {
+  background: #333;
+}
+
+.btn-danger {
+  background: #FF6B6B;
+}
+
+.btn-danger:hover {
+  background: #FF5252;
+}
+
+h2 {
+  color: black;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 3px solid black;
+}
+
+.content p {
+  color: black;
+  font-weight: bold;
+}
+
+.back-btn {
+  padding: 8px 16px;
+  background: black;
+  color: #FFD700;
+  border: 2px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.back-btn:hover {
+  background: #333;
 }

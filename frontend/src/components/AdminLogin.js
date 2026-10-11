@@ -11,7 +11,7 @@ const AdminLogin = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -20,21 +20,14 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/admin/login`,
-        formData
-      );
-
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/admin/login`, formData);
       const { token, user } = response.data;
-
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('role', 'admin');
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
+      localStorage.setItem('user', JSON.stringify(user));
       navigate('/admin-dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Invalid admin credentials');
     } finally {
       setLoading(false);
     }
@@ -45,40 +38,22 @@ const AdminLogin = () => {
       <div className="login-card">
         <h1>Admin Login</h1>
         {error && <div className="error-message">{error}</div>}
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="email@example.com"
-              required
-            />
+            <input type="email" name="email" value={formData.email} onChange={handleInputChange} required />
           </div>
-
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Password"
-              required
-            />
+            <input type="password" name="password" value={formData.password} onChange={handleInputChange} required />
           </div>
-
-          <button type="submit" disabled={loading} className="submit-btn">
-            {loading ? 'Loading...' : 'Login'}
+          <button type="submit" className="submit-btn" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-
         <p className="back-link">
-          <button onClick={() => navigate('/')} className="link-button">
-            ← Back to Login Selection
+          <button type="button" className="link-button" onClick={() => navigate('/')}>
+            ← Back
           </button>
         </p>
       </div>

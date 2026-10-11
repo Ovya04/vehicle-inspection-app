@@ -12,37 +12,25 @@ const LoginSelection = () => {
         <p>Select your role to login</p>
 
         <div className="role-buttons">
-          <button
-            onClick={() => navigate('/login/inspector')}
-            className="role-btn inspector-btn"
-          >
+          <button onClick={() => navigate('/login/inspector')} className="role-btn inspector-btn">
             <h2>🔍 Inspector</h2>
-            <p>Login as an inspector to conduct vehicle inspections</p>
+            <p>Inspect vehicles and update reports</p>
           </button>
 
-          <button
-            onClick={() => navigate('/login/customer')}
-            className="role-btn customer-btn"
-          >
+          <button onClick={() => navigate('/login/customer')} className="role-btn customer-btn">
             <h2>🚗 Customer</h2>
-            <p>Login as a customer to manage your vehicles</p>
+            <p>Manage your owned vehicles</p>
           </button>
 
-          <button
-            onClick={() => navigate('/login/admin')}
-            className="role-btn admin-btn"
-          >
+          <button onClick={() => navigate('/login/admin')} className="role-btn admin-btn">
             <h2>⚙️ Admin</h2>
-            <p>Login as admin to manage the system</p>
+            <p>Approve customers and manage system</p>
           </button>
         </div>
 
         <div className="registration-section">
           <p>Not a member?</p>
-          <button
-            onClick={() => navigate('/register/customer')}
-            className="register-link"
-          >
+          <button onClick={() => navigate('/register/customer')} className="register-link">
             Register as Customer
           </button>
         </div>

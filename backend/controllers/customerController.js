@@ -1,4 +1,5 @@
 const Customer = require('../models/Customer');
+const CustomerUser = require('../models/CustomerUser');
 
 exports.getAllCustomers = async (req, res, next) => {
   try {
@@ -66,6 +67,55 @@ exports.updateCustomer = async (req, res, next) => {
       message: 'Customer updated successfully',
       customer,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.registerCustomer = async (req, res, next) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      phone,
+      companyName,
+      companyAddress
+    } = req.body;
+
+    // Check if account already exists
+    const existingCustomer = await CustomerUser.findOne({ email });
+
+    if (existingCustomer) {
+      return res.status(400).json({
+        message: 'Customer with this email already exists'
+      });
+    }
+
+    const customer = await CustomerUser.create({
+      name,
+      email,
+      password,
+      phone,
+      companyName,
+      companyAddress,
+      status: 'pending',
+      role: 'customer'
+    });
+
+    res.status(201).json({
+      message:
+        'Registration successful. Your account is pending admin approval.',
+      customer: {
+        id: customer._id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        companyName: customer.companyName,
+        status: customer.status
+      }
+    });
+
   } catch (error) {
     next(error);
   }

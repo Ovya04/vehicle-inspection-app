@@ -5,6 +5,14 @@ exports.getAllInspections = async (req, res, next) => {
   try {
     const inspections = await Inspection.find()
       .populate('vehicleId')
+      .populate(
+        'customerId',
+        'name email phone companyName companyAddress'
+      )
+      .populate(
+        'inspectorId',
+        'name email'
+      )
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -70,13 +78,97 @@ exports.createOrUpdateInspection = async (req, res, next) => {
     next(error);
   }
 };
+exports.getPendingInspections = async (req, res, next) => {
+  try {
+    const inspections = await Inspection.find({
+      status: 'Pending',
+      inspectorId: null,
+    })
+      .populate('vehicleId')
+      .populate(
+        'customerId',
+        'name email phone companyName companyAddress'
+      )
+      .sort({ createdAt: 1 });
+
+    res.status(200).json({
+      count: inspections.length,
+      inspections,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+exports.assignInspection = async (req, res, next) => {
+  try {
+    const { inspectionId } = req.params;
+
+    const inspection = await Inspection.findOneAndUpdate(
+      {
+        _id: inspectionId,
+        status: 'Pending',
+        inspectorId: null,
+      },
+      {
+        inspectorId: req.user.id,
+        status: 'Assigned',
+        assignedAt: new Date(),
+      },
+      {
+        new: true,
+      }
+    )
+      .populate('vehicleId')
+      .populate(
+        'customerId',
+        'name email phone companyName companyAddress'
+      );
+
+    if (!inspection) {
+      return res.status(409).json({
+        message:
+          'This inspection has already been accepted by another inspector.',
+      });
+    }
+
+    res.status(200).json({
+      message: 'Inspection assigned successfully',
+      inspection,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+exports.getMyInspections = async (req, res, next) => {
+  try {
+    const inspections = await Inspection.find({
+      inspectorId: req.user.id,
+      status: {
+        $in: ['Assigned', 'In Progress'],
+      },
+    })
+      .populate('vehicleId')
+      .populate(
+        'customerId',
+        'name email phone companyName companyAddress'
+      )
+      .sort({ assignedAt: -1 });
+
+    res.status(200).json({
+      count: inspections.length,
+      inspections,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.updateInspectionStatus = async (req, res, next) => {
   try {
     const { vehicleId } = req.params;
     const { status } = req.body;
 
-    if (!['Pending', 'Completed', 'In Progress'].includes(status)) {
+    if (!['Pending','Assigned', 'Completed', 'In Progress'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
@@ -88,6 +180,57 @@ exports.updateInspectionStatus = async (req, res, next) => {
 
     if (!inspection) {
       return res.status(404).json({ message: 'Inspection not found' });
+    }
+
+    res.status(200).json({
+      message: 'Status updated successfully',
+      inspection,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateInspectionStatus = async (req, res, next) => {
+  try {
+    const { vehicleId } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = [
+      'Pending',
+      'Assigned',
+      'In Progress',
+      'Completed',
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        message: 'Invalid status',
+      });
+    }
+
+    const updateData = {
+      status,
+    };
+
+    if (status === 'In Progress') {
+      updateData.startedAt = new Date();
+    }
+
+    if (status === 'Completed') {
+      updateData.completedAt = new Date();
+    }
+
+    const inspection = await Inspection.findOneAndUpdate(
+      { vehicleId },
+      updateData,
+      { new: true }
+    );
+
+    if (!inspection) {
+      return res.status(404).json({
+        message: 'Inspection not found',
+      });
     }
 
     res.status(200).json({

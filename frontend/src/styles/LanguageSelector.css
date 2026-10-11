@@ -1,0 +1,26 @@
+.language-selector {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.lang-btn {
+  width: 36px;
+  height: 36px;
+  border: 2px solid black;
+  background: #ffd700;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+
+.lang-btn:hover {
+  background: #ffb000;
+  transform: scale(1.1);
+}
+
+.lang-btn.active {
+  background: black;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}

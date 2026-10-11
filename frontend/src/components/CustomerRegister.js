@@ -19,7 +19,7 @@ const CustomerRegister = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -29,13 +29,9 @@ const CustomerRegister = () => {
     setLoading(true);
 
     try {
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/customer/register`,
-        formData
-      );
-
-      setSuccess('Registration successful! Your account is pending admin verification.');
-      setTimeout(() => navigate('/'), 2000);
+      await axios.post(`${process.env.REACT_APP_API_URL}/customers/register`, formData);
+      setSuccess('Registration successful. Awaiting admin approval.');
+      setTimeout(() => navigate('/'), 1800);
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -49,86 +45,38 @@ const CustomerRegister = () => {
         <h1>Customer Registration</h1>
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Your Name"
-              required
-            />
+            <label>Name</label>
+            <input type="text" name="name" value={formData.name} onChange={handleInputChange} required />
           </div>
-
           <div className="form-group">
             <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="email@example.com"
-              required
-            />
+            <input type="email" name="email" value={formData.email} onChange={handleInputChange} required />
           </div>
-
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Min 6 characters"
-              required
-            />
+            <input type="password" name="password" value={formData.password} onChange={handleInputChange} required />
           </div>
-
           <div className="form-group">
             <label>Phone</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              placeholder="Phone number"
-              required
-            />
+            <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required />
           </div>
-
           <div className="form-group">
             <label>Company Name</label>
-            <input
-              type="text"
-              name="companyName"
-              value={formData.companyName}
-              onChange={handleInputChange}
-              placeholder="Company Name"
-            />
+            <input type="text" name="companyName" value={formData.companyName} onChange={handleInputChange} />
           </div>
-
           <div className="form-group">
             <label>Company Address</label>
-            <input
-              type="text"
-              name="companyAddress"
-              value={formData.companyAddress}
-              onChange={handleInputChange}
-              placeholder="Company Address"
-            />
+            <input type="text" name="companyAddress" value={formData.companyAddress} onChange={handleInputChange} />
           </div>
-
-          <button type="submit" disabled={loading} className="submit-btn">
+          <button type="submit" className="submit-btn" disabled={loading}>
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
-
         <p className="back-link">
-          <button onClick={() => navigate('/')} className="link-button">
-            ← Back to Login Selection
+          <button type="button" className="link-button" onClick={() => navigate('/')}>
+            ← Back
           </button>
         </p>
       </div>

@@ -7,16 +7,48 @@ const inspectionSchema = new mongoose.Schema(
       ref: 'Vehicle',
       required: true,
     },
+
+    // Customer account that requested/owns this inspection
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CustomerUser',
+      default: null,
+    },
+
+    // Inspector who accepted the job
+    inspectorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Inspector',
+      default: null,
+    },
+
     inspectionDate: {
       type: Date,
       default: Date.now,
     },
+
+    assignedAt: {
+      type: Date,
+      default: null,
+    },
+
+    startedAt: {
+      type: Date,
+      default: null,
+    },
+
+    completedAt: {
+      type: Date,
+      default: null,
+    },
+
     tires: {
       leftFront: String,
       rightFront: String,
       leftRear: String,
       rightRear: String,
     },
+
     battery: {
       make: String,
       replacementDate: Date,
@@ -25,6 +57,7 @@ const inspectionSchema = new mongoose.Schema(
       damage: String,
       leak: String,
     },
+
     exterior: {
       rust: String,
       dent: String,
@@ -33,6 +66,7 @@ const inspectionSchema = new mongoose.Schema(
       suspensionOilLeak: String,
       images: [String],
     },
+
     brakes: {
       fluidLevel: String,
       frontCondition: String,
@@ -40,6 +74,7 @@ const inspectionSchema = new mongoose.Schema(
       emergencyBrakeCondition: String,
       overallSummary: String,
     },
+
     engine: {
       rust: Boolean,
       dent: Boolean,
@@ -50,9 +85,10 @@ const inspectionSchema = new mongoose.Schema(
       brakeFluidColour: String,
       oilLeak: Boolean,
     },
+
     status: {
       type: String,
-      enum: ['Pending', 'Completed', 'In Progress'],
+      enum: ['Pending', 'Assigned', 'In Progress', 'Completed'],
       default: 'Pending',
     },
   },

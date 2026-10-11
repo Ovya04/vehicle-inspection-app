@@ -47,6 +47,8 @@ app.use('/api/vehicles', require('./routes/vehicleRoutes'));
 app.use('/api/inspections', require('./routes/inspectionRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/customer-vehicles', require('./routes/customerVehicleRoutes'));
 // Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 

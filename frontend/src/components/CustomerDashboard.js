@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import LanguageSelector from './LanguageSelector';
-import { translations, useTranslate } from '../i18n/translations';
+import {  useTranslate } from '../i18n/translations';
 import '../styles/Dashboard.css';
 
 const CustomerDashboard = () => {
@@ -72,7 +72,7 @@ const CustomerDashboard = () => {
         formDataWithImage.append('image', image);
       }
 
-      const response = await axios.post(
+       await axios.post(
         `${process.env.REACT_APP_API_URL}/customer-vehicles/upload`,
         formDataWithImage,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }

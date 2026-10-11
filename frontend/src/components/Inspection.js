@@ -28,6 +28,7 @@ const Inspection = () => {
   useEffect(() => {
     fetchInspection();
     localStorage.setItem('lang', lang);
+     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicleId, lang]);
 
   const fetchInspection = async () => {

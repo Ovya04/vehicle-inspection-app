@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Dashboard.css';
@@ -24,58 +24,56 @@ const AdminDashboard = () => {
     };
   };
 
-  const fetchPendingCustomers = async () => {
-    try {
-      setLoadingCustomers(true);
-      setError('');
+ const fetchPendingCustomers = useCallback(async () => {
+  try {
+    setLoadingCustomers(true);
+    setError('');
 
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/admin/customers/pending`,
-        getAuthConfig()
-      );
+    const response = await axios.get(
+      `${process.env.REACT_APP_API_URL}/admin/customers/pending`,
+      getAuthConfig()
+    );
 
-      console.log('Pending customers:', response.data);
+    setPendingCustomers(response.data.customers || []);
+  } catch (err) {
+    console.error('Fetch pending customers error:', err);
 
-      setPendingCustomers(response.data.customers || []);
-    } catch (err) {
-      console.error('Fetch pending customers error:', err);
+    setError(
+      err.response?.data?.message ||
+      'Unable to load pending registrations'
+    );
+  } finally {
+    setLoadingCustomers(false);
+  }
+}, []);
 
-      setError(
-        err.response?.data?.message ||
-        'Unable to load pending registrations'
-      );
-    } finally {
-      setLoadingCustomers(false);
-    }
-  };
+  const fetchInspections = useCallback(async () => {
+  try {
+    setLoadingInspections(true);
 
-  const fetchInspections = async () => {
-    try {
-      setLoadingInspections(true);
+    const response = await axios.get(
+      `${process.env.REACT_APP_API_URL}/inspections`,
+      getAuthConfig()
+    );
 
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/inspections`,
-        getAuthConfig()
-      );
+    setInspections(response.data.inspections || []);
+  } catch (err) {
+    console.error('Fetch inspections error:', err);
 
-      console.log('All inspections:', response.data);
-
-      setInspections(response.data.inspections || []);
-    } catch (err) {
-      console.error('Fetch inspections error:', err);
-
-      setError(
-        err.response?.data?.message ||
-        'Unable to load inspections'
-      );
-    } finally {
-      setLoadingInspections(false);
-    }
-  };
+    setError(
+      err.response?.data?.message ||
+      'Unable to load inspections'
+    );
+  } finally {
+    setLoadingInspections(false);
+  }
+}, []);
 
   useEffect(() => {
     fetchPendingCustomers();
     fetchInspections();
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   const handleApprove = async (customerId) => {

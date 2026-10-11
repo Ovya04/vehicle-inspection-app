@@ -47,34 +47,58 @@ const AdminDashboard = () => {
   }
 }, []);
 
-  const fetchInspections = useCallback(async () => {
-  try {
-    setLoadingInspections(true);
+  
 
-    const response = await axios.get(
-      `${process.env.REACT_APP_API_URL}/inspections`,
-      getAuthConfig()
-    );
-
-    setInspections(response.data.inspections || []);
-  } catch (err) {
-    console.error('Fetch inspections error:', err);
-
-    setError(
-      err.response?.data?.message ||
-      'Unable to load inspections'
-    );
-  } finally {
-    setLoadingInspections(false);
-  }
-}, []);
 
   useEffect(() => {
-    fetchPendingCustomers();
-    fetchInspections();
-     // eslint-disable-next-line react-hooks/exhaustive-deps
+  const loadDashboardData = async () => {
+    try {
+      const token = localStorage.getItem('token');
 
-  }, []);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      setLoadingCustomers(true);
+      setLoadingInspections(true);
+      setError('');
+
+      const [pendingResponse, inspectionsResponse] = await Promise.all([
+        axios.get(
+          `${process.env.REACT_APP_API_URL}/admin/customers/pending`,
+          config
+        ),
+        axios.get(
+          `${process.env.REACT_APP_API_URL}/inspections`,
+          config
+        ),
+      ]);
+
+      setPendingCustomers(
+        pendingResponse.data.customers || []
+      );
+
+      setInspections(
+        inspectionsResponse.data.inspections || []
+      );
+
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+
+      setError(
+        err.response?.data?.message ||
+        'Unable to load dashboard data'
+      );
+    } finally {
+      setLoadingCustomers(false);
+      setLoadingInspections(false);
+    }
+  };
+
+  loadDashboardData();
+}, []);
 
   const handleApprove = async (customerId) => {
     try {
